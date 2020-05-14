@@ -21,17 +21,12 @@ public class PolicyHandler{
     public void wheneverEditedVideo_AdModified(@Payload EditedVideo editedVideo){
         if(editedVideo.isMe()){
             System.out.println("===================광고횟수 차감=====================");
-            int viewCnt = editedVideo.getViewCount();
-            AdvertisingSystem ads = new AdvertisingSystem();
-            StringTokenizer st = new StringTokenizer(editedVideo.getAdList(), ",");
-            int countTokens = st.countTokens();
-            for (int i = 0; i < countTokens; i++) {
-                String token = st.nextToken();
-                long adId = Long.valueOf(token);
-                avertisingSystemRepository.findById(adId).ifPresent(advertisingSystem -> advertisingSystem.minusAdCnt(editedVideo.getViewCount()));
-            }
+            avertisingSystemRepository.findById(editedVideo.getAdId()).ifPresent(ad -> {
+                ad.minusAdCnt(editedVideo.getViewCount());
+                avertisingSystemRepository.save(ad);
+            });
+            System.out.println("##### listener AdModified : " + editedVideo.toJson());
 
-            System.out.println("##### listener editedVideo : " + editedVideo.toJson());
         }
 
     }
